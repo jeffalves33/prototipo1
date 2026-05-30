@@ -1,0 +1,13 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { StatusBadge } from "@/components/StatusBadge";
+import { vehicles, pendencies, maintenances } from "@/lib/mock-data";
+import { num } from "@/lib/calculations";
+import { vehicleStatusLabel, vehicleStatusTone, vehicleTypeLabel } from "@/lib/status-rules";
+
+export const Route = createFileRoute("/mechanic/veiculos")({ head: () => ({ meta: [{ title: "Mecânico — Veículos" }] }), component: MechanicVehicles });
+function MechanicVehicles() {
+  const [q, setQ] = useState(""); const [status, setStatus] = useState("all");
+  const filtered = vehicles.filter((v) => `${v.plate} ${v.brand} ${v.model}`.toLowerCase().includes(q.toLowerCase()) && (status === "all" || v.status === status));
+  return <div className="mx-auto max-w-md space-y-4 p-4"><header><div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Veículos</div><h1 className="text-xl font-semibold">Frota para manutenção</h1><p className="text-sm text-muted-foreground">Abra o veículo para ver histórico, serviços e pendências.</p></header><div className="rounded-xl border border-border bg-card p-3"><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar por placa ou modelo..." className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" /><select value={status} onChange={(e) => setStatus(e.target.value)} className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"><option value="all">Todos os status</option>{Object.entries(vehicleStatusLabel).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></div><div className="space-y-2">{filtered.map((v) => { const p = pendencies.filter((x) => x.vehicleId === v.id && x.status === "aberta"); const m = maintenances.filter((x) => x.vehicleId === v.id); return <a href={`/mechanic/veiculos/${v.id}`} key={v.id} className="block rounded-xl border border-border bg-card p-3 hover:bg-muted/40"><div className="flex items-start justify-between gap-2"><div><div className="font-semibold">{v.plate} · {v.brand} {v.model}</div><div className="text-xs text-muted-foreground">{vehicleTypeLabel[v.type]} · KM {num(v.currentKm)}</div></div><StatusBadge tone={vehicleStatusTone[v.status]}>{vehicleStatusLabel[v.status]}</StatusBadge></div><div className="mt-3 grid grid-cols-2 gap-2 text-xs"><div className="rounded-lg bg-muted p-2"><div className="text-muted-foreground">Pendências</div><div className="text-lg font-semibold">{p.length}</div></div><div className="rounded-lg bg-muted p-2"><div className="text-muted-foreground">Histórico</div><div className="text-lg font-semibold">{m.length}</div></div></div></a>; })}</div></div>;
+}

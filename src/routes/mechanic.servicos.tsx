@@ -1,0 +1,13 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { StatusBadge } from "@/components/StatusBadge";
+import { services, pendencies } from "@/lib/mock-data";
+import { maintenanceTypeLabel, periodicityLabel, serviceCategoryLabel } from "@/lib/status-rules";
+import type { ServiceCategory } from "@/types/fleet";
+
+export const Route = createFileRoute("/mechanic/servicos")({ head: () => ({ meta: [{ title: "Mecânico — Serviços" }] }), component: MechanicServices });
+function MechanicServices() {
+  const [q, setQ] = useState(""); const [cat, setCat] = useState<ServiceCategory | "all">("all");
+  const filtered = services.filter((s) => `${s.name} ${s.description}`.toLowerCase().includes(q.toLowerCase()) && (cat === "all" || s.category === cat));
+  return <div className="mx-auto max-w-md space-y-4 p-4"><header><div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Serviços</div><h1 className="text-xl font-semibold">Catálogo de manutenção</h1><p className="text-sm text-muted-foreground">Óleo e pneus são categorias de serviço periódico.</p></header><div className="rounded-xl border border-border bg-card p-3"><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar serviço..." className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" /><select value={cat} onChange={(e) => setCat(e.target.value as ServiceCategory | "all")} className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"><option value="all">Todas categorias</option>{Object.entries(serviceCategoryLabel).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></div><div className="space-y-2">{filtered.map((s) => { const count = pendencies.filter((p) => p.serviceId === s.id).length; return <div key={s.id} className="rounded-xl border border-border bg-card p-3"><div className="flex items-start justify-between gap-2"><div><div className="font-semibold text-foreground">{s.name}</div><div className="text-xs text-muted-foreground">{serviceCategoryLabel[s.category]}</div></div><StatusBadge tone={s.suggestedMaintenanceType === "preventiva" ? "ok" : "warn"}>{maintenanceTypeLabel[s.suggestedMaintenanceType]}</StatusBadge></div><p className="mt-2 text-sm text-muted-foreground">{s.description}</p><div className="mt-3 rounded-lg bg-muted px-3 py-2 text-sm"><b>Periodicidade:</b> {periodicityLabel(s.periodicityType, s.periodicityKm, s.periodicityDays)}</div>{count > 0 && <div className="mt-2 text-xs text-destructive">{count} pendência(s) relacionada(s)</div>}</div>; })}</div></div>;
+}
