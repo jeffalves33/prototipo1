@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
 import { FilterBar, TableShell } from "@/components/admin/AdminBlocks";
@@ -71,7 +71,7 @@ function DriversPage() {
                 <td className="px-4 py-3 text-right tabular-nums">{num(d.totalKm)}</td>
                 <td className="px-4 py-3 text-right tabular-nums">{brl(d.totalTravelExpenses)}</td>
                 <td className="px-4 py-3"><StatusBadge tone={driverStatusTone[d.status]}>{driverStatusLabel[d.status]}</StatusBadge></td>
-                <td className="px-4 py-3 text-right"><a href={`/admin/motoristas/${d.id}`} className="font-medium text-primary hover:underline">Detalhes →</a></td>
+                <td className="px-4 py-3 text-right"><Link to="/admin/motoristas/$id" params={{ id: d.id }} className="font-medium text-primary hover:underline">Detalhes →</Link></td>
               </tr>
             );
           })}

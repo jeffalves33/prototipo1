@@ -1,17 +1,120 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
-import { FilterBar, TableShell, MiniBar } from "@/components/admin/AdminBlocks";
+import { FilterBar, TableShell } from "@/components/admin/AdminBlocks";
 import { StatCard } from "@/components/StatCard";
 import { expenses, drivers, vehicles, trips } from "@/lib/mock-data";
-import { brl, formatDateTime, num, sum } from "@/lib/calculations";
+import { brl, formatDateTime, sum } from "@/lib/calculations";
 import { expenseTypeLabel } from "@/lib/status-rules";
 import type { ExpenseType } from "@/types/fleet";
 
-export const Route = createFileRoute("/admin/despesas")({ head: () => ({ meta: [{ title: "Despesas — Admin" }] }), component: ExpensesPage });
+export const Route = createFileRoute("/admin/despesas")({
+  head: () => ({ meta: [{ title: "Despesas — Admin" }] }),
+  component: ExpensesPage,
+});
+
 function ExpensesPage() {
-  const [q, setQ] = useState(""); const [type, setType] = useState<ExpenseType | "all">("all"); const [driverId, setDriverId] = useState("all");
-  const filtered = useMemo(() => expenses.filter((e) => { const d = drivers.find((x) => x.id === e.driverId); const v = vehicles.find((x) => x.id === e.vehicleId); const t = trips.find((x) => x.id === e.tripId); const text = `${d?.name ?? ""} ${v?.plate ?? ""} ${t?.origin ?? ""} ${t?.destination ?? ""} ${e.notes}`.toLowerCase(); return text.includes(q.toLowerCase()) && (type === "all" || e.type === type) && (driverId === "all" || e.driverId === driverId); }), [q, type, driverId]);
-  const total = sum(filtered.map((e) => e.value)); const max = Math.max(1, ...Object.keys(expenseTypeLabel).map((k) => sum(filtered.filter((e) => e.type === k).map((e) => e.value))));
-  return <><AdminTopbar title="Despesas de viagem" subtitle="Pedágio, alimentação, hospedagem, descarga e outros custos por viagem" actions={<button className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground">+ Nova despesa</button>} /><div className="space-y-4 p-6"><div className="grid gap-3 md:grid-cols-4"><StatCard label="Registros" value={filtered.length} /><StatCard label="Total" value={brl(total)} tone="warn" /><StatCard label="Média por registro" value={brl(filtered.length ? total / filtered.length : 0)} /><StatCard label="Motoristas" value={new Set(filtered.map((e) => e.driverId)).size} /></div><FilterBar><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar motorista, placa, rota..." className="rounded-md border border-input bg-background px-3 py-2 text-sm" /><select value={type} onChange={(e) => setType(e.target.value as ExpenseType | "all")} className="rounded-md border border-input bg-background px-3 py-2 text-sm"><option value="all">Todos os tipos</option>{Object.entries(expenseTypeLabel).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select><select value={driverId} onChange={(e) => setDriverId(e.target.value)} className="rounded-md border border-input bg-background px-3 py-2 text-sm"><option value="all">Todos os motoristas</option>{drivers.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select><div className="rounded-md border border-input bg-background px-3 py-2 text-sm text-muted-foreground">{filtered.length} registros</div></FilterBar><div className="grid gap-4 xl:grid-cols-[1fr_360px]"><TableShell head={["Data", "Tipo", "Motorista", "Veículo", "Viagem", "Valor", "Obs."]}>{filtered.map((e) => { const d = drivers.find((x) => x.id === e.driverId); const v = vehicles.find((x) => x.id === e.vehicleId); const t = trips.find((x) => x.id === e.tripId); return <tr key={e.id} className="hover:bg-muted/40"><td className="px-4 py-3">{formatDateTime(e.date)}</td><td className="px-4 py-3 font-medium">{expenseTypeLabel[e.type]}</td><td className="px-4 py-3">{d?.name ?? "—"}</td><td className="px-4 py-3">{v?.plate ?? "—"}</td><td className="px-4 py-3 text-muted-foreground">{t?.origin} → {t?.destination}</td><td className="px-4 py-3 text-right">{brl(e.value)}</td><td className="px-4 py-3 text-muted-foreground">{e.notes || "—"}</td></tr>; })}</TableShell><section className="rounded-lg border border-border bg-card p-4"><h2 className="font-semibold">Distribuição por categoria</h2><div className="mt-4 space-y-4">{Object.entries(expenseTypeLabel).map(([k, label]) => { const v = sum(filtered.filter((e) => e.type === k).map((e) => e.value)); return <MiniBar key={k} label={label} value={v} max={max} right={brl(v)} />; })}</div></section></div></div></>;
+  const [q, setQ] = useState("");
+  const [type, setType] = useState<ExpenseType | "all">("all");
+  const [driverId, setDriverId] = useState("all");
+
+  const filtered = useMemo(
+    () =>
+      expenses.filter((e) => {
+        const d = drivers.find((x) => x.id === e.driverId);
+        const v = vehicles.find((x) => x.id === e.vehicleId);
+        const t = trips.find((x) => x.id === e.tripId);
+        const text = `${d?.name ?? ""} ${v?.plate ?? ""} ${t?.origin ?? ""} ${t?.destination ?? ""} ${e.notes}`.toLowerCase();
+
+        return (
+          text.includes(q.toLowerCase()) &&
+          (type === "all" || e.type === type) &&
+          (driverId === "all" || e.driverId === driverId)
+        );
+      }),
+    [q, type, driverId],
+  );
+
+  const total = sum(filtered.map((e) => e.value));
+
+  return (
+    <>
+      <AdminTopbar
+        title="Despesas de viagem"
+        subtitle="Pedágio, alimentação, hospedagem, descarga e outros custos por viagem"
+        actions={
+          <button className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground">
+            + Nova despesa
+          </button>
+        }
+      />
+
+      <div className="space-y-4 p-6">
+        <div className="grid gap-3 md:grid-cols-4">
+          <StatCard label="Registros" value={filtered.length} />
+          <StatCard label="Total" value={brl(total)} tone="warn" />
+          <StatCard label="Média por registro" value={brl(filtered.length ? total / filtered.length : 0)} />
+          <StatCard label="Motoristas" value={new Set(filtered.map((e) => e.driverId)).size} />
+        </div>
+
+        <FilterBar>
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Buscar motorista, placa, rota..."
+            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+          />
+          <select
+            value={type}
+            onChange={(e) => setType(e.target.value as ExpenseType | "all")}
+            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+          >
+            <option value="all">Todos os tipos</option>
+            {Object.entries(expenseTypeLabel).map(([k, v]) => (
+              <option key={k} value={k}>
+                {v}
+              </option>
+            ))}
+          </select>
+          <select
+            value={driverId}
+            onChange={(e) => setDriverId(e.target.value)}
+            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+          >
+            <option value="all">Todos os motoristas</option>
+            {drivers.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.name}
+              </option>
+            ))}
+          </select>
+          <div className="rounded-md border border-input bg-background px-3 py-2 text-sm text-muted-foreground">
+            {filtered.length} registros
+          </div>
+        </FilterBar>
+
+        <TableShell head={["Data", "Tipo", "Motorista", "Veículo", "Viagem", "Valor", "Obs."]}>
+          {filtered.map((e) => {
+            const d = drivers.find((x) => x.id === e.driverId);
+            const v = vehicles.find((x) => x.id === e.vehicleId);
+            const t = trips.find((x) => x.id === e.tripId);
+
+            return (
+              <tr key={e.id} className="hover:bg-muted/40">
+                <td className="px-4 py-3">{formatDateTime(e.date)}</td>
+                <td className="px-4 py-3 font-medium">{expenseTypeLabel[e.type]}</td>
+                <td className="px-4 py-3">{d?.name ?? "—"}</td>
+                <td className="px-4 py-3">{v?.plate ?? "—"}</td>
+                <td className="px-4 py-3 text-muted-foreground">
+                  {t ? `${t.origin} → ${t.destination}` : "—"}
+                </td>
+                <td className="px-4 py-3 text-right">{brl(e.value)}</td>
+                <td className="px-4 py-3 text-muted-foreground">{e.notes || "—"}</td>
+              </tr>
+            );
+          })}
+        </TableShell>
+      </div>
+    </>
+  );
 }

@@ -33,6 +33,7 @@ import { Route as AdminAbastecimentosRouteImport } from './routes/admin.abasteci
 import { Route as MechanicVeiculosIdRouteImport } from './routes/mechanic.veiculos.$id'
 import { Route as AdminViagensIdRouteImport } from './routes/admin.viagens.$id'
 import { Route as AdminVeiculosIdRouteImport } from './routes/admin.veiculos.$id'
+import { Route as AdminServicosIdRouteImport } from './routes/admin.servicos.$id'
 import { Route as AdminMotoristasIdRouteImport } from './routes/admin.motoristas.$id'
 import { Route as AdminManutencoesIdRouteImport } from './routes/admin.manutencoes.$id'
 
@@ -156,6 +157,11 @@ const AdminVeiculosIdRoute = AdminVeiculosIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AdminVeiculosRoute,
 } as any)
+const AdminServicosIdRoute = AdminServicosIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminServicosRoute,
+} as any)
 const AdminMotoristasIdRoute = AdminMotoristasIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -180,7 +186,7 @@ export interface FileRoutesByFullPath {
   '/admin/motoristas': typeof AdminMotoristasRouteWithChildren
   '/admin/pendencias': typeof AdminPendenciasRoute
   '/admin/relatorios': typeof AdminRelatoriosRoute
-  '/admin/servicos': typeof AdminServicosRoute
+  '/admin/servicos': typeof AdminServicosRouteWithChildren
   '/admin/veiculos': typeof AdminVeiculosRouteWithChildren
   '/admin/viagens': typeof AdminViagensRouteWithChildren
   '/mechanic/pendencias': typeof MechanicPendenciasRoute
@@ -191,6 +197,7 @@ export interface FileRoutesByFullPath {
   '/mechanic/': typeof MechanicIndexRoute
   '/admin/manutencoes/$id': typeof AdminManutencoesIdRoute
   '/admin/motoristas/$id': typeof AdminMotoristasIdRoute
+  '/admin/servicos/$id': typeof AdminServicosIdRoute
   '/admin/veiculos/$id': typeof AdminVeiculosIdRoute
   '/admin/viagens/$id': typeof AdminViagensIdRoute
   '/mechanic/veiculos/$id': typeof MechanicVeiculosIdRoute
@@ -205,7 +212,7 @@ export interface FileRoutesByTo {
   '/admin/motoristas': typeof AdminMotoristasRouteWithChildren
   '/admin/pendencias': typeof AdminPendenciasRoute
   '/admin/relatorios': typeof AdminRelatoriosRoute
-  '/admin/servicos': typeof AdminServicosRoute
+  '/admin/servicos': typeof AdminServicosRouteWithChildren
   '/admin/veiculos': typeof AdminVeiculosRouteWithChildren
   '/admin/viagens': typeof AdminViagensRouteWithChildren
   '/mechanic/pendencias': typeof MechanicPendenciasRoute
@@ -216,6 +223,7 @@ export interface FileRoutesByTo {
   '/mechanic': typeof MechanicIndexRoute
   '/admin/manutencoes/$id': typeof AdminManutencoesIdRoute
   '/admin/motoristas/$id': typeof AdminMotoristasIdRoute
+  '/admin/servicos/$id': typeof AdminServicosIdRoute
   '/admin/veiculos/$id': typeof AdminVeiculosIdRoute
   '/admin/viagens/$id': typeof AdminViagensIdRoute
   '/mechanic/veiculos/$id': typeof MechanicVeiculosIdRoute
@@ -234,7 +242,7 @@ export interface FileRoutesById {
   '/admin/motoristas': typeof AdminMotoristasRouteWithChildren
   '/admin/pendencias': typeof AdminPendenciasRoute
   '/admin/relatorios': typeof AdminRelatoriosRoute
-  '/admin/servicos': typeof AdminServicosRoute
+  '/admin/servicos': typeof AdminServicosRouteWithChildren
   '/admin/veiculos': typeof AdminVeiculosRouteWithChildren
   '/admin/viagens': typeof AdminViagensRouteWithChildren
   '/mechanic/pendencias': typeof MechanicPendenciasRoute
@@ -245,6 +253,7 @@ export interface FileRoutesById {
   '/mechanic/': typeof MechanicIndexRoute
   '/admin/manutencoes/$id': typeof AdminManutencoesIdRoute
   '/admin/motoristas/$id': typeof AdminMotoristasIdRoute
+  '/admin/servicos/$id': typeof AdminServicosIdRoute
   '/admin/veiculos/$id': typeof AdminVeiculosIdRoute
   '/admin/viagens/$id': typeof AdminViagensIdRoute
   '/mechanic/veiculos/$id': typeof MechanicVeiculosIdRoute
@@ -275,6 +284,7 @@ export interface FileRouteTypes {
     | '/mechanic/'
     | '/admin/manutencoes/$id'
     | '/admin/motoristas/$id'
+    | '/admin/servicos/$id'
     | '/admin/veiculos/$id'
     | '/admin/viagens/$id'
     | '/mechanic/veiculos/$id'
@@ -300,6 +310,7 @@ export interface FileRouteTypes {
     | '/mechanic'
     | '/admin/manutencoes/$id'
     | '/admin/motoristas/$id'
+    | '/admin/servicos/$id'
     | '/admin/veiculos/$id'
     | '/admin/viagens/$id'
     | '/mechanic/veiculos/$id'
@@ -328,6 +339,7 @@ export interface FileRouteTypes {
     | '/mechanic/'
     | '/admin/manutencoes/$id'
     | '/admin/motoristas/$id'
+    | '/admin/servicos/$id'
     | '/admin/veiculos/$id'
     | '/admin/viagens/$id'
     | '/mechanic/veiculos/$id'
@@ -510,6 +522,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminVeiculosIdRouteImport
       parentRoute: typeof AdminVeiculosRoute
     }
+    '/admin/servicos/$id': {
+      id: '/admin/servicos/$id'
+      path: '/$id'
+      fullPath: '/admin/servicos/$id'
+      preLoaderRoute: typeof AdminServicosIdRouteImport
+      parentRoute: typeof AdminServicosRoute
+    }
     '/admin/motoristas/$id': {
       id: '/admin/motoristas/$id'
       path: '/$id'
@@ -550,6 +569,18 @@ const AdminMotoristasRouteWithChildren = AdminMotoristasRoute._addFileChildren(
   AdminMotoristasRouteChildren,
 )
 
+interface AdminServicosRouteChildren {
+  AdminServicosIdRoute: typeof AdminServicosIdRoute
+}
+
+const AdminServicosRouteChildren: AdminServicosRouteChildren = {
+  AdminServicosIdRoute: AdminServicosIdRoute,
+}
+
+const AdminServicosRouteWithChildren = AdminServicosRoute._addFileChildren(
+  AdminServicosRouteChildren,
+)
+
 interface AdminVeiculosRouteChildren {
   AdminVeiculosIdRoute: typeof AdminVeiculosIdRoute
 }
@@ -583,7 +614,7 @@ interface AdminRouteChildren {
   AdminMotoristasRoute: typeof AdminMotoristasRouteWithChildren
   AdminPendenciasRoute: typeof AdminPendenciasRoute
   AdminRelatoriosRoute: typeof AdminRelatoriosRoute
-  AdminServicosRoute: typeof AdminServicosRoute
+  AdminServicosRoute: typeof AdminServicosRouteWithChildren
   AdminVeiculosRoute: typeof AdminVeiculosRouteWithChildren
   AdminViagensRoute: typeof AdminViagensRouteWithChildren
   AdminIndexRoute: typeof AdminIndexRoute
@@ -598,7 +629,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminMotoristasRoute: AdminMotoristasRouteWithChildren,
   AdminPendenciasRoute: AdminPendenciasRoute,
   AdminRelatoriosRoute: AdminRelatoriosRoute,
-  AdminServicosRoute: AdminServicosRoute,
+  AdminServicosRoute: AdminServicosRouteWithChildren,
   AdminVeiculosRoute: AdminVeiculosRouteWithChildren,
   AdminViagensRoute: AdminViagensRouteWithChildren,
   AdminIndexRoute: AdminIndexRoute,
