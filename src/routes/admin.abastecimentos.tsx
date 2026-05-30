@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
+import { ActionDialog } from "@/components/admin/ActionDialog";
 import { FilterBar, TableShell } from "@/components/admin/AdminBlocks";
 import { StatCard } from "@/components/StatCard";
 import { refuels, drivers, vehicles, trips } from "@/lib/mock-data";
@@ -47,9 +48,23 @@ function RefuelsPage() {
         title="Abastecimentos"
         subtitle="Controle operacional de consumo. Motorista registra litros e KM; admin fecha valores."
         actions={
-          <button className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground">
-            + Lançar valor
-          </button>
+          <ActionDialog
+            triggerLabel="+ Lançar valor"
+            title="Lançar abastecimento"
+            description="Registre KM, combustível, litros e valor do abastecimento."
+            submitLabel="Salvar abastecimento"
+            fields={[
+              { label: "Veículo", type: "select", options: vehicles.map((v) => ({ label: `${v.plate} · ${v.model}`, value: v.id })) },
+              { label: "Motorista", type: "select", options: drivers.map((d) => ({ label: d.name, value: d.id })) },
+              { label: "Viagem", type: "select", options: [{ label: "Avulso", value: "none" }, ...trips.map((t) => ({ label: `${t.origin} → ${t.destination}`, value: t.id }))] },
+              { label: "Combustível", type: "select", options: Object.entries(fuelTypeLabel).map(([value, label]) => ({ label, value })) },
+              { label: "KM atual", type: "number", placeholder: "412000" },
+              { label: "Litros", type: "number", placeholder: "220" },
+              { label: "Preço unitário", type: "number", placeholder: "6,18" },
+              { label: "Valor total", type: "number", placeholder: "1359,60" },
+              { label: "Observação", type: "textarea", wide: true },
+            ]}
+          />
         }
       />
 

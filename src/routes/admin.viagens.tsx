@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
+import { ActionDialog } from "@/components/admin/ActionDialog";
 import { FilterBar, TableShell } from "@/components/admin/AdminBlocks";
 import { StatCard } from "@/components/StatCard";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -33,7 +34,7 @@ function TripsPage() {
   const expenseTotal = sum(expenses.map((e) => e.value));
 
   return <>
-    <AdminTopbar title="Viagens" subtitle="Rotas, veículos, motoristas e registros operacionais por viagem" actions={<button className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground">+ Nova viagem</button>} />
+    <AdminTopbar title="Viagens" subtitle="Rotas, veículos, motoristas e registros operacionais por viagem" actions={<ActionDialog triggerLabel="+ Nova viagem" title="Nova viagem" description="Abra uma viagem com motorista, veículo, rota e KM inicial." submitLabel="Salvar viagem" fields={[{ label: "Motorista", type: "select", options: drivers.map((d) => ({ label: d.name, value: d.id })) }, { label: "Veículo", type: "select", options: vehicles.map((v) => ({ label: `${v.plate} · ${v.model}`, value: v.id })) }, { label: "Origem", placeholder: "São Paulo/SP" }, { label: "Destino", placeholder: "Curitiba/PR" }, { label: "Data de início", type: "date", value: "2026-05-29" }, { label: "KM inicial", type: "number", placeholder: "412000" }, { label: "Status", type: "select", options: Object.entries(tripStatusLabel).map(([value, label]) => ({ label, value })) }, { label: "Veículo temporário", type: "select", options: [{ label: "Não", value: "nao" }, { label: "Sim", value: "sim" }] }, { label: "Observações", type: "textarea", wide: true }]} />} />
     <div className="space-y-4 p-6">
       <div className="grid gap-3 md:grid-cols-4"><StatCard label="Viagens" value={trips.length} /><StatCard label="Em andamento" value={inProgress} tone="warn" /><StatCard label="KM rodados" value={num(km)} /><StatCard label="Despesas" value={brl(expenseTotal)} /></div>
       <FilterBar>

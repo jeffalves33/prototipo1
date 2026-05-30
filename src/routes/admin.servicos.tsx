@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
+import { ActionDialog } from "@/components/admin/ActionDialog";
 import { FilterBar, TableShell } from "@/components/admin/AdminBlocks";
 import { StatCard } from "@/components/StatCard";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -35,9 +36,21 @@ function ServicesPage() {
         title="Serviços"
         subtitle="Cadastro de serviços periódicos. Óleo e pneus são categorias de serviço, não módulos separados."
         actions={
-          <button className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground">
-            + Novo serviço
-          </button>
+          <ActionDialog
+            triggerLabel="+ Novo serviço"
+            title="Novo serviço"
+            description="Cadastre um serviço periódico ou corretivo para usar nas manutenções."
+            submitLabel="Salvar serviço"
+            fields={[
+              { label: "Nome", placeholder: "Troca de óleo do motor" },
+              { label: "Categoria", type: "select", options: Object.entries(serviceCategoryLabel).map(([value, label]) => ({ label, value })) },
+              { label: "Tipo sugerido", type: "select", options: Object.entries(maintenanceTypeLabel).map(([value, label]) => ({ label, value })) },
+              { label: "Periodicidade", type: "select", options: [{ label: "Por KM", value: "km" }, { label: "Por tempo", value: "time" }, { label: "Sem recorrência", value: "none" }] },
+              { label: "KM de recorrência", type: "number", placeholder: "10000" },
+              { label: "Dias de recorrência", type: "number", placeholder: "365" },
+              { label: "Descrição", type: "textarea", wide: true },
+            ]}
+          />
         }
       />
 

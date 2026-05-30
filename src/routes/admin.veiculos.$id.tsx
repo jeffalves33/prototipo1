@@ -1,6 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
+import { ActionDialog } from "@/components/admin/ActionDialog";
 import { StatusBadge } from "@/components/StatusBadge";
 import { StatCard } from "@/components/StatCard";
 import {
@@ -87,15 +88,43 @@ function VehicleDetail() {
             >
               ← Voltar
             </Link>
-            <button className="rounded-md border border-input bg-card px-3 py-1.5 text-sm hover:bg-accent">
-              Alterar status
-            </button>
-            <button className="rounded-md border border-input bg-card px-3 py-1.5 text-sm hover:bg-accent">
-              Atribuir motorista
-            </button>
-            <button className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90">
-              Veículo temporário p/ viagem
-            </button>
+            <ActionDialog
+              triggerLabel="Alterar status"
+              title="Alterar status do veículo"
+              description="Atualize a disponibilidade operacional deste veículo."
+              submitLabel="Salvar status"
+              triggerClassName="rounded-md border border-input bg-card px-3 py-1.5 text-sm hover:bg-accent"
+              fields={[
+                { label: "Status atual", type: "summary", value: vehicleStatusLabel[v.status] },
+                { label: "Novo status", type: "select", value: v.status, options: Object.entries(vehicleStatusLabel).map(([value, label]) => ({ label, value })) },
+                { label: "Motivo", type: "textarea", wide: true },
+              ]}
+            />
+            <ActionDialog
+              triggerLabel="Atribuir motorista"
+              title="Atribuir motorista"
+              description="Defina o motorista principal deste veículo."
+              submitLabel="Salvar vínculo"
+              triggerClassName="rounded-md border border-input bg-card px-3 py-1.5 text-sm hover:bg-accent"
+              fields={[
+                { label: "Veículo", type: "summary", value: `${v.plate} · ${v.brand} ${v.model}` },
+                { label: "Motorista", type: "select", value: driver?.id ?? "none", options: [{ label: "Sem motorista", value: "none" }, ...drivers.map((d) => ({ label: d.name, value: d.id }))] },
+                { label: "Observação", type: "textarea", wide: true },
+              ]}
+            />
+            <ActionDialog
+              triggerLabel="Veículo temporário p/ viagem"
+              title="Autorizar veículo temporário"
+              description="Escolha uma viagem e registre este veículo como substituto temporário."
+              submitLabel="Autorizar"
+              triggerClassName="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+              fields={[
+                { label: "Viagem", type: "select", options: trips.map((t) => ({ label: `${t.origin} → ${t.destination}`, value: t.id })) },
+                { label: "Motorista", type: "select", options: drivers.map((d) => ({ label: d.name, value: d.id })) },
+                { label: "Veículo temporário", type: "summary", value: `${v.plate} · ${v.brand} ${v.model}` },
+                { label: "Justificativa", type: "textarea", wide: true },
+              ]}
+            />
           </>
         }
       />

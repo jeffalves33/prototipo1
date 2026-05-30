@@ -1,5 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
+import { ActionDialog } from "@/components/admin/ActionDialog";
 import { DetailRow, SectionCard, TableShell } from "@/components/admin/AdminBlocks";
 import { StatCard } from "@/components/StatCard";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -44,9 +45,22 @@ function ServiceDetail() {
             >
               ← Voltar
             </Link>
-            <button className="rounded-md border border-input bg-card px-3 py-2 text-sm hover:bg-accent">
-              Editar serviço
-            </button>
+            <ActionDialog
+              triggerLabel="Editar serviço"
+              title="Editar serviço"
+              description="Atualize cadastro, categoria e recorrência do serviço."
+              submitLabel="Salvar alterações"
+              triggerClassName="rounded-md border border-input bg-card px-3 py-2 text-sm hover:bg-accent"
+              fields={[
+                { label: "Nome", value: service.name },
+                { label: "Categoria", type: "select", value: service.category, options: Object.entries(serviceCategoryLabel).map(([value, label]) => ({ label, value })) },
+                { label: "Tipo sugerido", type: "select", value: service.suggestedMaintenanceType, options: Object.entries(maintenanceTypeLabel).map(([value, label]) => ({ label, value })) },
+                { label: "Periodicidade", type: "select", value: service.periodicityType, options: [{ label: "Por KM", value: "km" }, { label: "Por tempo", value: "time" }, { label: "Sem recorrência", value: "none" }] },
+                { label: "KM de recorrência", type: "number", value: service.periodicityKm ?? "" },
+                { label: "Dias de recorrência", type: "number", value: service.periodicityDays ?? "" },
+                { label: "Descrição", type: "textarea", value: service.description, wide: true },
+              ]}
+            />
           </>
         }
       />

@@ -1,0 +1,10 @@
+{
+  "name": "Frota ERP",
+  "short_name": "Frota",
+  "description": "Protótipo mockado de ERP para gestão de frota, motoristas e manutenção.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6f8fb",
+  "theme_color": "#0056a3",
+  "orientation": "portrait-primary"
+}

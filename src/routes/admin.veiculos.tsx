@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
+import { ActionDialog } from "@/components/admin/ActionDialog";
 import { StatusBadge } from "@/components/StatusBadge";
 import { vehicles, drivers } from "@/lib/mock-data";
 import {
@@ -46,9 +47,25 @@ function VehiclesList() {
         title="Veículos"
         subtitle={`${filtered.length} de ${vehicles.length} veículos`}
         actions={
-          <button className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90">
-            + Novo veículo
-          </button>
+          <ActionDialog
+            triggerLabel="+ Novo veículo"
+            title="Novo veículo"
+            description="Cadastre dados principais, documentação e vínculo inicial do veículo."
+            submitLabel="Salvar veículo"
+            triggerClassName="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            fields={[
+              { label: "Placa", placeholder: "ABC-1D23" },
+              { label: "Tipo", type: "select", options: Object.entries(vehicleTypeLabel).map(([value, label]) => ({ label, value })) },
+              { label: "Marca", placeholder: "Scania" },
+              { label: "Modelo", placeholder: "R 450" },
+              { label: "Ano", type: "number", placeholder: "2026" },
+              { label: "Capacidade", placeholder: "29 ton" },
+              { label: "KM atual", type: "number", placeholder: "0" },
+              { label: "Motorista principal", type: "select", options: [{ label: "Sem motorista", value: "none" }, ...drivers.map((d) => ({ label: d.name, value: d.id }))] },
+              { label: "Vencimento documentação", type: "date" },
+              { label: "Vencimento tacógrafo", type: "date" },
+            ]}
+          />
         }
       />
 

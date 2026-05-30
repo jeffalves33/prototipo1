@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
+import { ActionDialog } from "@/components/admin/ActionDialog";
 import { FilterBar, TableShell } from "@/components/admin/AdminBlocks";
 import { StatCard } from "@/components/StatCard";
 import { expenses, drivers, vehicles, trips } from "@/lib/mock-data";
@@ -43,9 +44,21 @@ function ExpensesPage() {
         title="Despesas de viagem"
         subtitle="Pedágio, alimentação, hospedagem, descarga e outros custos por viagem"
         actions={
-          <button className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground">
-            + Nova despesa
-          </button>
+          <ActionDialog
+            triggerLabel="+ Nova despesa"
+            title="Nova despesa"
+            description="Registre uma despesa vinculada ao motorista, veículo e viagem."
+            submitLabel="Salvar despesa"
+            fields={[
+              { label: "Tipo", type: "select", options: Object.entries(expenseTypeLabel).map(([value, label]) => ({ label, value })) },
+              { label: "Valor", type: "number", placeholder: "180,00" },
+              { label: "Motorista", type: "select", options: drivers.map((d) => ({ label: d.name, value: d.id })) },
+              { label: "Veículo", type: "select", options: vehicles.map((v) => ({ label: `${v.plate} · ${v.model}`, value: v.id })) },
+              { label: "Viagem", type: "select", options: trips.map((t) => ({ label: `${t.origin} → ${t.destination}`, value: t.id })) },
+              { label: "Data", type: "date", value: "2026-05-28" },
+              { label: "Observação", type: "textarea", wide: true },
+            ]}
+          />
         }
       />
 

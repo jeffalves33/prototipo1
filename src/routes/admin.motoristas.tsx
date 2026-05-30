@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
+import { ActionDialog } from "@/components/admin/ActionDialog";
 import { FilterBar, TableShell } from "@/components/admin/AdminBlocks";
 import { StatusBadge } from "@/components/StatusBadge";
 import { StatCard } from "@/components/StatCard";
@@ -35,7 +36,24 @@ function DriversPage() {
       <AdminTopbar
         title="Motoristas"
         subtitle="Cadastro, vínculo com veículo, CNH e histórico operacional"
-        actions={<button className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground">+ Novo motorista</button>}
+        actions={
+          <ActionDialog
+            triggerLabel="+ Novo motorista"
+            title="Novo motorista"
+            description="Cadastre dados pessoais, CNH e veículo principal."
+            submitLabel="Salvar motorista"
+            fields={[
+              { label: "Nome", placeholder: "Nome completo" },
+              { label: "Telefone", placeholder: "(11) 99999-9999" },
+              { label: "CPF", placeholder: "000.000.000-00" },
+              { label: "Endereço", placeholder: "Rua, número - Cidade/UF" },
+              { label: "Número da CNH", placeholder: "00000000000" },
+              { label: "Validade da CNH", type: "date" },
+              { label: "Veículo principal", type: "select", options: [{ label: "Sem veículo", value: "none" }, ...vehicles.map((v) => ({ label: `${v.plate} · ${v.model}`, value: v.id }))] },
+              { label: "Status", type: "select", options: Object.entries(driverStatusLabel).map(([value, label]) => ({ label, value })) },
+            ]}
+          />
+        }
       />
       <div className="space-y-4 p-6">
         <div className="grid gap-3 md:grid-cols-4">
