@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useProfile } from "@/lib/profile";
 import { Hammer, AlertTriangle, Truck, ListChecks, LogOut } from "lucide-react";
 
@@ -15,6 +15,7 @@ const tabs = [
 
 function MechanicLayout() {
   const { setProfile } = useProfile();
+  const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
   return (
     <div className="flex min-h-screen flex-col bg-background pb-16">
@@ -24,7 +25,10 @@ function MechanicLayout() {
           <div className="text-base font-semibold text-foreground">Mecânico</div>
         </div>
         <button
-          onClick={() => setProfile(null)}
+          onClick={() => {
+            setProfile(null);
+            void navigate({ to: "/" });
+          }}
           className="flex items-center gap-1 rounded-md border border-input px-2 py-1 text-xs text-muted-foreground hover:bg-accent"
         >
           <LogOut className="h-3.5 w-3.5" />

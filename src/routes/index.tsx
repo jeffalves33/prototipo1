@@ -55,13 +55,9 @@ function ProfileSelector() {
     <div className="min-h-screen bg-background px-4 py-12">
       <div className="mx-auto max-w-5xl">
         <div className="text-center">
-          <div className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Prototipo 1</div>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
             Selecione o perfil de acesso
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Protótipo funcional — cada perfil tem fluxos próprios. Sem autenticação real.
-          </p>
         </div>
 
         <div className="mt-10 grid gap-4 sm:grid-cols-3">

@@ -1,4 +1,4 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useProfile } from "@/lib/profile";
 import type { ReactNode } from "react";
 import {
@@ -32,7 +32,13 @@ const items: { to: string; label: string; icon: ReactNode }[] = [
 
 export function AdminSidebar() {
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
   const { setProfile } = useProfile();
+
+  const switchProfile = () => {
+    setProfile(null);
+    void navigate({ to: "/" });
+  };
 
   return (
     <aside className="hidden lg:flex w-60 shrink-0 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
@@ -60,7 +66,7 @@ export function AdminSidebar() {
         })}
       </nav>
       <button
-        onClick={() => setProfile(null)}
+        onClick={switchProfile}
         className="flex items-center gap-2 border-t border-sidebar-border px-5 py-3 text-sm text-sidebar-foreground/80 hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/60"
       >
         <LogOut className="h-4 w-4" />

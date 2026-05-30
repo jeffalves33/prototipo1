@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useProfile } from "@/lib/profile";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -24,6 +24,7 @@ export const Route = createFileRoute("/driver/")({
 const ACTIVE_DRIVER_ID = "d1";
 
 function DriverScreen() {
+  const navigate = useNavigate();
   const { setProfile } = useProfile();
   const driver = drivers.find((d) => d.id === ACTIVE_DRIVER_ID)!;
   const vehicle = vehicles.find((v) => v.id === driver.mainVehicleId) ?? null;
@@ -46,7 +47,10 @@ function DriverScreen() {
           <div className="text-base font-semibold text-foreground">{driver.name}</div>
         </div>
         <button
-          onClick={() => setProfile(null)}
+          onClick={() => {
+            setProfile(null);
+            void navigate({ to: "/" });
+          }}
           className="flex items-center gap-1 rounded-md border border-input px-2 py-1 text-xs text-muted-foreground hover:bg-accent"
         >
           <LogOut className="h-3.5 w-3.5" />
