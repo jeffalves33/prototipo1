@@ -20,7 +20,7 @@ function MechanicLayout() {
     <div className="flex min-h-screen flex-col bg-background pb-16">
       <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card px-4 py-3">
         <div>
-          <div className="text-[10px] font-semibold uppercase tracking-widest text-primary">Frota</div>
+          <div className="text-[10px] font-semibold uppercase tracking-widest text-primary">Prototipo 1</div>
           <div className="text-base font-semibold text-foreground">Mecânico</div>
         </div>
         <button

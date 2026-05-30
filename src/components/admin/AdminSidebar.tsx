@@ -37,7 +37,7 @@ export function AdminSidebar() {
   return (
     <aside className="hidden lg:flex w-60 shrink-0 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
       <div className="px-5 py-5 border-b border-sidebar-border">
-        <div className="text-xs uppercase tracking-widest text-sidebar-foreground/60">Frota ERP</div>
+        <div className="text-xs uppercase tracking-widest text-sidebar-foreground/60">Prototipo 1</div>
         <div className="mt-0.5 text-lg font-semibold">Administrador</div>
       </div>
       <nav className="flex-1 overflow-y-auto py-3">

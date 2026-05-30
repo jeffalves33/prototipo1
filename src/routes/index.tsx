@@ -7,8 +7,8 @@ import { useEffect } from "react";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Frota — Selecionar perfil" },
-      { name: "description", content: "Selecione o perfil para entrar no sistema de gestão de frota." },
+      { title: "Prototipo 1" },
+      { name: "description", content: "Prototipo 1" },
     ],
   }),
   component: ProfileSelector,
@@ -55,7 +55,7 @@ function ProfileSelector() {
     <div className="min-h-screen bg-background px-4 py-12">
       <div className="mx-auto max-w-5xl">
         <div className="text-center">
-          <div className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Frota ERP</div>
+          <div className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Prototipo 1</div>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
             Selecione o perfil de acesso
           </h1>

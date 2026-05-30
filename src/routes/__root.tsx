@@ -10,7 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
+import { reportAppError } from "../lib/error-reporting";
 import { ProfileProvider } from "@/lib/profile";
 
 function NotFoundComponent() {
@@ -39,7 +39,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
   useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    reportAppError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
 
   return (
@@ -78,11 +78,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Frota — Gestão de Frota" },
-      { name: "description", content: "Protótipo mockado de ERP para gestão de frota" },
-      { name: "author", content: "Prodexy" },
-      { property: "og:title", content: "Frota ERP" },
-      { property: "og:description", content: "Protótipo mockado de ERP para gestão de frota" },
+      { title: "Prototipo 1" },
+      { name: "description", content: "Prototipo 1" },
+      { name: "author", content: "Prototipo 1" },
+      { property: "og:title", content: "Prototipo 1" },
+      { property: "og:description", content: "Prototipo 1" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "theme-color", content: "#0056a3" },

@@ -42,7 +42,7 @@ function DriverScreen() {
     <div className="min-h-screen bg-background pb-10">
       <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card px-4 py-3">
         <div>
-          <div className="text-[10px] font-semibold uppercase tracking-widest text-primary">Frota</div>
+          <div className="text-[10px] font-semibold uppercase tracking-widest text-primary">Prototipo 1</div>
           <div className="text-base font-semibold text-foreground">{driver.name}</div>
         </div>
         <button

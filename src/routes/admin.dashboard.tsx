@@ -127,7 +127,7 @@ function AdminDashboard() {
           <StatCard
             label="Consumo médio"
             value={`${avgConsumption.toFixed(2)} km/L`}
-            hint="frota"
+            hint="geral"
           />
           <StatCard label="Gasto total" value={brl(totalSpend)} tone="danger" />
           <StatCard label="Manutenção" value={brl(maintCost)} hint="período" />
