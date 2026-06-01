@@ -88,6 +88,7 @@ function DriverScreen() {
               <div className="text-sm text-muted-foreground">
                 {vehicle.brand} {vehicle.model} · KM {num(vehicle.currentKm)}
               </div>
+              <div className="mt-1 text-xs text-muted-foreground">Rota fixa: {vehicle.fixedRoute}</div>
               {vehicle.status !== "ativo" && (
                 <div className="mt-3 rounded-md bg-warning/15 px-3 py-2 text-xs text-[oklch(0.42_0.13_70)]">
                   Veículo {vehicleStatusLabel[vehicle.status].toLowerCase()}. Procure o gestor antes de iniciar viagem.
@@ -258,16 +259,15 @@ function StartTripCard({
   onStart,
 }: {
   driverId: string;
-  vehicle: { id: string; currentKm: number };
+  vehicle: { id: string; currentKm: number; fixedRoute: string };
   onStart: (t: Trip) => void;
 }) {
-  const [origin, setOrigin] = useState("");
-  const [destination, setDestination] = useState("");
   const [initialKm, setInitialKm] = useState(String(vehicle.currentKm));
   const [notes, setNotes] = useState("");
+  const [origin, destination] = splitFixedRoute(vehicle.fixedRoute);
 
   const submit = () => {
-    if (!origin || !destination || !initialKm) return;
+    if (!initialKm) return;
     const t: Trip = {
       id: "t" + Math.random().toString(36).slice(2, 8),
       driverId,
@@ -290,12 +290,10 @@ function StartTripCard({
     <section className="rounded-xl border border-border bg-card p-4">
       <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Iniciar viagem</div>
       <div className="mt-3 space-y-2">
-        <Field label="Origem">
-          <input value={origin} onChange={(e) => setOrigin(e.target.value)} className="input" placeholder="Cidade/UF" />
-        </Field>
-        <Field label="Destino">
-          <input value={destination} onChange={(e) => setDestination(e.target.value)} className="input" placeholder="Cidade/UF" />
-        </Field>
+        <div className="rounded-lg bg-muted p-3 text-sm">
+          <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Rota fixa</div>
+          <div className="mt-1 font-semibold text-foreground">{vehicle.fixedRoute}</div>
+        </div>
         <Field label="KM inicial">
           <input value={initialKm} onChange={(e) => setInitialKm(e.target.value)} className="input" inputMode="numeric" />
         </Field>
@@ -313,6 +311,11 @@ function StartTripCard({
       <style>{`.input{width:100%;border:1px solid var(--input);background:var(--background);border-radius:8px;padding:8px 10px;font-size:14px}`}</style>
     </section>
   );
+}
+
+function splitFixedRoute(route: string) {
+  const [origin = route, destination = route] = route.split(/\s*(?:->|→|-)\s*/);
+  return [origin, destination] as const;
 }
 
 function RefuelDrawer({

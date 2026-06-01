@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
 import { ActionDialog } from "@/components/admin/ActionDialog";
@@ -16,6 +16,7 @@ export const Route = createFileRoute("/admin/motoristas")({
 });
 
 function DriversPage() {
+  const path = useRouterState({ select: (state) => state.location.pathname });
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<DriverStatus | "all">("all");
   const [license, setLicense] = useState<LicenseStatus | "all">("all");
@@ -30,6 +31,8 @@ function DriversPage() {
   const licenseAlerts = drivers.filter((d) => d.licenseStatus !== "ok").length;
   const tripCount = trips.length;
   const expenseTotal = expenses.reduce((s, e) => s + e.value, 0);
+
+  if (path !== "/admin/motoristas") return <Outlet />;
 
   return (
     <>
@@ -89,7 +92,7 @@ function DriversPage() {
                 <td className="px-4 py-3 text-right tabular-nums">{num(d.totalKm)}</td>
                 <td className="px-4 py-3 text-right tabular-nums">{brl(d.totalTravelExpenses)}</td>
                 <td className="px-4 py-3"><StatusBadge tone={driverStatusTone[d.status]}>{driverStatusLabel[d.status]}</StatusBadge></td>
-                <td className="px-4 py-3 text-right"><Link to="/admin/motoristas/$id" params={{ id: d.id }} className="font-medium text-primary hover:underline">Detalhes →</Link></td>
+                <td className="px-4 py-3 text-right"><a href={`/admin/motoristas/${d.id}`} className="font-medium text-primary hover:underline">Detalhes</a></td>
               </tr>
             );
           })}

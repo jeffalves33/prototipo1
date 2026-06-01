@@ -1,9 +1,10 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
 import { ActionDialog } from "@/components/admin/ActionDialog";
 import { StatusBadge } from "@/components/StatusBadge";
-import { vehicles, drivers } from "@/lib/mock-data";
+import { StatCard } from "@/components/StatCard";
+import { vehicles, drivers, trips, refuels, expenses, maintenances } from "@/lib/mock-data";
 import {
   vehicleStatusLabel,
   vehicleStatusTone,
@@ -11,7 +12,7 @@ import {
   docStatusLabel,
   docStatusTone,
 } from "@/lib/status-rules";
-import { num } from "@/lib/calculations";
+import { brl, num, sum, vehicleTotalCost } from "@/lib/calculations";
 import type { VehicleStatus, VehicleType } from "@/types/fleet";
 
 export const Route = createFileRoute("/admin/veiculos")({
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/admin/veiculos")({
 });
 
 function VehiclesList() {
+  const path = useRouterState({ select: (state) => state.location.pathname });
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<VehicleStatus | "all">("all");
   const [type, setType] = useState<VehicleType | "all">("all");
@@ -28,7 +30,7 @@ function VehiclesList() {
   const filtered = useMemo(
     () =>
       vehicles.filter((v) => {
-        if (q && !`${v.plate} ${v.brand} ${v.model}`.toLowerCase().includes(q.toLowerCase()))
+        if (q && !`${v.plate} ${v.brand} ${v.model} ${v.fixedRoute}`.toLowerCase().includes(q.toLowerCase()))
           return false;
         if (status !== "all" && v.status !== status) return false;
         if (type !== "all" && v.type !== type) return false;
@@ -40,6 +42,23 @@ function VehiclesList() {
 
   const driverName = (id: string | null) =>
     id ? drivers.find((d) => d.id === id)?.name ?? "—" : "Sem motorista";
+
+  const fleetKm = sum(trips.map((t) => t.totalKm ?? 0));
+  const fleetLiters = sum(refuels.map((r) => r.liters));
+  const fleetCost = sum(
+    vehicles.map((vehicle) =>
+      vehicleTotalCost(
+        vehicle,
+        refuels.filter((r) => r.vehicleId === vehicle.id),
+        expenses.filter((e) => e.vehicleId === vehicle.id),
+        maintenances.filter((m) => m.vehicleId === vehicle.id),
+      ),
+    ),
+  );
+  const available = vehicles.filter((v) => v.status === "ativo" || v.status === "reservado").length;
+  const avgConsumption = fleetLiters > 0 ? fleetKm / fleetLiters : 0;
+
+  if (path !== "/admin/veiculos") return <Outlet />;
 
   return (
     <>
@@ -60,16 +79,25 @@ function VehiclesList() {
               { label: "Modelo", placeholder: "R 450" },
               { label: "Ano", type: "number", placeholder: "2026" },
               { label: "Capacidade", placeholder: "29 ton" },
+              { label: "Rota fixa", placeholder: "Sao Paulo/SP -> Curitiba/PR", wide: true },
               { label: "KM atual", type: "number", placeholder: "0" },
               { label: "Motorista principal", type: "select", options: [{ label: "Sem motorista", value: "none" }, ...drivers.map((d) => ({ label: d.name, value: d.id }))] },
               { label: "Vencimento documentação", type: "date" },
               { label: "Vencimento tacógrafo", type: "date" },
+              { label: "Vencimento CETURB", type: "date" },
             ]}
           />
         }
       />
 
       <div className="p-6 space-y-4">
+        <section className="grid gap-3 md:grid-cols-4">
+          <StatCard label="Veiculos" value={vehicles.length} />
+          <StatCard label="Disponiveis" value={available} tone="ok" />
+          <StatCard label="Consumo medio" value={`${avgConsumption.toFixed(2)} km/L`} />
+          <StatCard label="Custo da frota" value={brl(fleetCost)} tone="warn" />
+        </section>
+
         <div className="grid gap-2 rounded-lg border border-border bg-card p-3 sm:grid-cols-4">
           <input
             value={q}
@@ -122,9 +150,11 @@ function VehiclesList() {
                 <th className="px-4 py-2.5 text-left font-medium">Placa</th>
                 <th className="px-4 py-2.5 text-left font-medium">Veículo</th>
                 <th className="px-4 py-2.5 text-left font-medium">Tipo</th>
+                <th className="px-4 py-2.5 text-left font-medium">Rota fixa</th>
                 <th className="px-4 py-2.5 text-left font-medium">Motorista</th>
                 <th className="px-4 py-2.5 text-right font-medium">KM atual</th>
                 <th className="px-4 py-2.5 text-left font-medium">Documentação</th>
+                <th className="px-4 py-2.5 text-left font-medium">CETURB</th>
                 <th className="px-4 py-2.5 text-left font-medium">Status</th>
                 <th className="px-4 py-2.5"></th>
               </tr>
@@ -137,6 +167,7 @@ function VehiclesList() {
                     {v.brand} {v.model} <span className="text-muted-foreground">· {v.year}</span>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{vehicleTypeLabel[v.type]}</td>
+                  <td className="px-4 py-3 text-foreground">{v.fixedRoute}</td>
                   <td className="px-4 py-3 text-foreground">{driverName(v.mainDriverId)}</td>
                   <td className="px-4 py-3 text-right tabular-nums text-foreground">{num(v.currentKm)}</td>
                   <td className="px-4 py-3">
@@ -145,24 +176,29 @@ function VehiclesList() {
                     </StatusBadge>
                   </td>
                   <td className="px-4 py-3">
+                    <StatusBadge tone={docStatusTone[v.ceturbStatus]}>
+                      {docStatusLabel[v.ceturbStatus]}
+                    </StatusBadge>
+                    <div className="mt-1 text-xs text-muted-foreground">{v.ceturbDueDate}</div>
+                  </td>
+                  <td className="px-4 py-3">
                     <StatusBadge tone={vehicleStatusTone[v.status]}>
                       {vehicleStatusLabel[v.status]}
                     </StatusBadge>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <Link
-                      to="/admin/veiculos/$id"
-                      params={{ id: v.id }}
+                    <a
+                      href={`/admin/veiculos/${v.id}`}
                       className="text-sm font-medium text-primary hover:underline"
                     >
                       Detalhes →
-                    </Link>
+                    </a>
                   </td>
                 </tr>
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-10 text-center text-sm text-muted-foreground">
+                  <td colSpan={10} className="px-4 py-10 text-center text-sm text-muted-foreground">
                     Nenhum veículo encontrado.
                   </td>
                 </tr>

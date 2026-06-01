@@ -14,11 +14,14 @@ export interface Vehicle {
   status: VehicleStatus;
   currentKm: number;
   capacity: string;
+  fixedRoute: string;
   mainDriverId: string | null;
   documentationDueDate: string;
   tachographDueDate: string;
+  ceturbDueDate: string;
   documentationStatus: DocStatus;
   tachographStatus: DocStatus;
+  ceturbStatus: DocStatus;
   averageConsumption: number;
   totalMaintenanceCost: number;
   createdAt: string;
@@ -143,6 +146,25 @@ export interface Maintenance {
   notes: string;
 }
 
+export type TireStatus = "ok" | "atencao" | "critico" | "recapagem";
+
+export interface TireRecord {
+  id: string;
+  vehicleId: string;
+  position: string;
+  brand: string;
+  model: string;
+  installedAtKm: number;
+  currentKm: number;
+  treadDepthMm: number;
+  pressurePsi: number;
+  life: "novo" | "primeira_recapagem" | "segunda_recapagem";
+  status: TireStatus;
+  lastInspectionDate: string;
+  nextAction: string;
+  accumulatedCost: number;
+}
+
 export type PendencyType =
   | "servico_km_vencido"
   | "servico_km_proximo"
@@ -152,7 +174,8 @@ export type PendencyType =
   | "veiculo_manutencao"
   | "cnh_vencida"
   | "documentacao_vencida"
-  | "tacografo_vencido";
+  | "tacografo_vencido"
+  | "ceturb_vencida";
 
 export type PendencySeverity = "baixa" | "atencao" | "critica";
 

@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AdminTopbar } from "@/components/admin/AdminTopbar";
 import { ActionDialog } from "@/components/admin/ActionDialog";
@@ -15,6 +15,7 @@ export const Route = createFileRoute("/admin/servicos")({
 });
 
 function ServicesPage() {
+  const path = useRouterState({ select: (state) => state.location.pathname });
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<ServiceCategory | "all">("all");
   const [periodicity, setPeriodicity] = useState<PeriodicityType | "all">("all");
@@ -29,6 +30,8 @@ function ServicesPage() {
       ),
     [q, cat, periodicity],
   );
+
+  if (path !== "/admin/servicos") return <Outlet />;
 
   return (
     <>
@@ -96,7 +99,7 @@ function ServicesPage() {
           </div>
         </FilterBar>
 
-        <TableShell head={["Serviço", "Categoria", "Tipo sugerido", "Periodicidade", "Uso", "Status", ""]}>
+        <TableShell head={["Serviço", "Categoria", "Tipo sugerido", "Periodicidade", "Uso", "Status"]}>
           {filtered.map((s) => (
             <tr key={s.id} className="hover:bg-muted/40">
               <td className="px-4 py-3 font-medium">
@@ -113,15 +116,6 @@ function ServicesPage() {
               </td>
               <td className="px-4 py-3">
                 <StatusBadge tone={s.status === "ativo" ? "ok" : "muted"}>{s.status}</StatusBadge>
-              </td>
-              <td className="px-4 py-3 text-right">
-                <Link
-                  to="/admin/servicos/$id"
-                  params={{ id: s.id }}
-                  className="font-medium text-primary hover:underline"
-                >
-                  Detalhes →
-                </Link>
               </td>
             </tr>
           ))}

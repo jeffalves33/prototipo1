@@ -12,6 +12,7 @@ import {
   expenses,
   maintenances,
   pendencies,
+  tireRecords,
 } from "@/lib/mock-data";
 import {
   vehicleStatusLabel,
@@ -51,6 +52,7 @@ const tabs = [
   { id: "refuels", label: "Abastecimentos" },
   { id: "expenses", label: "Despesas" },
   { id: "maintenance", label: "Manutenções" },
+  { id: "tires", label: "Pneus" },
   { id: "pendencies", label: "Pendências" },
   { id: "docs", label: "Documentação" },
 ] as const;
@@ -69,19 +71,44 @@ function VehicleDetail() {
   const vExpenses = expenses.filter((e) => e.vehicleId === v.id);
   const vMaint = maintenances.filter((m) => m.vehicleId === v.id);
   const vPend = pendencies.filter((p) => p.vehicleId === v.id);
+  const vTires = tireRecords.filter((tire) => tire.vehicleId === v.id);
 
   const totalKm = sum(vTrips.filter((t) => t.totalKm != null).map((t) => t.totalKm as number));
   const totalLiters = sum(vRefuels.map((r) => r.liters));
   const avgCons = totalLiters > 0 ? totalKm / totalLiters : 0;
   const totalCost = vehicleTotalCost(v, vRefuels, vExpenses, vMaint);
+  const tireAlerts = vTires.filter((tire) => tire.status !== "ok").length;
+  const tireCost = sum(vTires.map((tire) => tire.accumulatedCost));
+  const tireAvgTread =
+    vTires.length > 0 ? sum(vTires.map((tire) => tire.treadDepthMm)) / vTires.length : 0;
 
   return (
     <>
       <AdminTopbar
         title={`${v.plate} — ${v.brand} ${v.model}`}
-        subtitle={`${vehicleTypeLabel[v.type]} · ${v.year} · ${v.capacity}`}
+        subtitle={`${vehicleTypeLabel[v.type]} · ${v.year} · ${v.capacity} · ${v.fixedRoute}`}
         actions={
           <>
+            <ActionDialog
+              triggerLabel="Editar veiculo"
+              title="Editar veiculo"
+              description="Atualize dados cadastrais, rota fixa e documentacao deste veiculo."
+              submitLabel="Salvar veiculo"
+              triggerClassName="rounded-md border border-input bg-card px-3 py-1.5 text-sm hover:bg-accent"
+              fields={[
+                { label: "Placa", value: v.plate },
+                { label: "Tipo", type: "select", value: v.type, options: Object.entries(vehicleTypeLabel).map(([value, label]) => ({ label, value })) },
+                { label: "Marca", value: v.brand },
+                { label: "Modelo", value: v.model },
+                { label: "Ano", type: "number", value: v.year },
+                { label: "Capacidade", value: v.capacity },
+                { label: "Rota fixa", value: v.fixedRoute, wide: true },
+                { label: "KM atual", type: "number", value: v.currentKm },
+                { label: "Vencimento documentacao", type: "date", value: v.documentationDueDate },
+                { label: "Vencimento tacografo", type: "date", value: v.tachographDueDate },
+                { label: "Vencimento CETURB", type: "date", value: v.ceturbDueDate },
+              ]}
+            />
             <Link
               to="/admin/veiculos"
               className="rounded-md border border-input bg-card px-3 py-1.5 text-sm hover:bg-accent"
@@ -130,7 +157,7 @@ function VehicleDetail() {
       />
 
       <div className="p-6 space-y-4">
-        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
           <div className="rounded-lg border border-border bg-card p-4">
             <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Status</div>
             <div className="mt-2">
@@ -143,6 +170,12 @@ function VehicleDetail() {
           <StatCard label="KM atual" value={num(v.currentKm)} />
           <StatCard label="Consumo médio" value={`${avgCons.toFixed(2)} km/L`} hint="histórico" />
           <StatCard label="Custo total" value={brl(totalCost)} tone="danger" hint="combustível + manut. + desp." />
+          <StatCard
+            label="Pneus em atencao"
+            value={String(tireAlerts)}
+            tone={tireAlerts > 0 ? "warn" : "ok"}
+            hint={`${vTires.length} monitorados`}
+          />
         </section>
 
         <div className="flex flex-wrap gap-1 rounded-lg border border-border bg-card p-1">
@@ -169,6 +202,7 @@ function VehicleDetail() {
               <Row k="Marca / Modelo" v={`${v.brand} ${v.model}`} />
               <Row k="Ano" v={String(v.year)} />
               <Row k="Capacidade" v={v.capacity} />
+              <Row k="Rota fixa" v={v.fixedRoute} />
               <Row k="Cadastrado em" v={formatDate(v.createdAt)} />
             </Card>
             <Card title="Indicadores operacionais">
@@ -177,6 +211,9 @@ function VehicleDetail() {
               <Row k="Viagens" v={String(vTrips.length)} />
               <Row k="Manutenções" v={String(vMaint.length)} />
               <Row k="Custo manutenção" v={brl(sum(vMaint.map((m) => m.value)))} />
+              <Row k="Pneus monitorados" v={String(vTires.length)} />
+              <Row k="Custo pneus" v={brl(tireCost)} />
+              <Row k="Sulco medio" v={vTires.length > 0 ? `${tireAvgTread.toFixed(1)} mm` : "-"} />
               <Row k="Pendências abertas" v={String(vPend.length)} />
             </Card>
           </div>
@@ -251,6 +288,44 @@ function VehicleDetail() {
           </Table>
         )}
 
+        {tab === "tires" && (
+          <Table head={["Posicao", "Pneu", "Vida", "Sulco", "Pressao", "Custo", "Status", "Proxima acao"]}>
+            {vTires.length === 0 && (
+              <tr>
+                <td colSpan={8} className="px-4 py-6 text-center text-sm text-muted-foreground">
+                  Sem pneus cadastrados para este veiculo.
+                </td>
+              </tr>
+            )}
+            {vTires.map((tire) => (
+              <tr key={tire.id} className="hover:bg-muted/30">
+                <td className="px-4 py-2.5 font-medium">{tire.position}</td>
+                <td className="px-4 py-2.5">
+                  {tire.brand} {tire.model}
+                  <div className="text-xs text-muted-foreground">
+                    Instalado no KM {num(tire.installedAtKm)}
+                  </div>
+                </td>
+                <td className="px-4 py-2.5">{tireLifeLabel[tire.life]}</td>
+                <td className="px-4 py-2.5 text-right tabular-nums">{tire.treadDepthMm.toFixed(1)} mm</td>
+                <td className="px-4 py-2.5 text-right tabular-nums">{tire.pressurePsi} psi</td>
+                <td className="px-4 py-2.5 text-right tabular-nums">{brl(tire.accumulatedCost)}</td>
+                <td className="px-4 py-2.5 text-right">
+                  <StatusBadge tone={tireStatusTone[tire.status]}>
+                    {tireStatusLabel[tire.status]}
+                  </StatusBadge>
+                </td>
+                <td className="px-4 py-2.5 text-right">
+                  {tire.nextAction}
+                  <div className="text-xs text-muted-foreground">
+                    Ultima inspecao: {formatDate(tire.lastInspectionDate)}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </Table>
+        )}
+
         {tab === "pendencies" && (
           <div className="rounded-lg border border-border bg-card divide-y divide-border">
             {vPend.length === 0 && (
@@ -271,7 +346,7 @@ function VehicleDetail() {
         )}
 
         {tab === "docs" && (
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid gap-4 lg:grid-cols-3">
             <Card title="Documentação do veículo">
               <Row k="Vencimento" v={formatDate(v.documentationDueDate)} />
               <div className="flex items-center justify-between py-1.5 text-sm">
@@ -290,12 +365,41 @@ function VehicleDetail() {
                 </StatusBadge>
               </div>
             </Card>
+            <Card title="CETURB">
+              <Row k="Vencimento" v={formatDate(v.ceturbDueDate)} />
+              <div className="flex items-center justify-between py-1.5 text-sm">
+                <span className="text-muted-foreground">Status</span>
+                <StatusBadge tone={docStatusTone[v.ceturbStatus]}>
+                  {docStatusLabel[v.ceturbStatus]}
+                </StatusBadge>
+              </div>
+            </Card>
           </div>
         )}
       </div>
     </>
   );
 }
+
+const tireStatusLabel = {
+  ok: "OK",
+  atencao: "Atencao",
+  critico: "Critico",
+  recapagem: "Recapagem",
+} as const;
+
+const tireStatusTone = {
+  ok: "ok",
+  atencao: "warn",
+  critico: "danger",
+  recapagem: "info",
+} as const;
+
+const tireLifeLabel = {
+  novo: "Novo",
+  primeira_recapagem: "1a recapagem",
+  segunda_recapagem: "2a recapagem",
+} as const;
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
