@@ -30,7 +30,7 @@ import {
   fuelTypeLabel,
   expenseTypeLabel,
 } from "@/lib/status-rules";
-import { brl, num, formatDate, formatDateTime, sum, vehicleTotalCost } from "@/lib/calculations";
+import { brl, num, formatDate, formatDateTime, splitFixedRoute, sum, vehicleTotalCost } from "@/lib/calculations";
 
 export const Route = createFileRoute("/admin/veiculos/$id")({
   head: ({ params }) => {
@@ -220,17 +220,19 @@ function VehicleDetail() {
         )}
 
         {tab === "trips" && (
-          <Table head={["Início", "Origem → Destino", "Motorista", "KM", "Status"]}>
+          <Table head={["Data inicial", "Data final", "Origem", "Destino", "Motorista", "KM inicial", "KM final", "Status"]}>
             {vTrips.map((t) => {
               const d = drivers.find((x) => x.id === t.driverId);
+              const { origin, destination } = splitFixedRoute(v.fixedRoute);
               return (
                 <tr key={t.id} className="hover:bg-muted/30">
                   <td className="px-4 py-2.5">{formatDateTime(t.startedAt)}</td>
-                  <td className="px-4 py-2.5">
-                    {t.origin} <span className="text-muted-foreground">→</span> {t.destination}
-                  </td>
+                  <td className="px-4 py-2.5">{formatDateTime(t.finishedAt)}</td>
+                  <td className="px-4 py-2.5">{origin}</td>
+                  <td className="px-4 py-2.5">{destination}</td>
                   <td className="px-4 py-2.5">{d?.name ?? "—"}</td>
-                  <td className="px-4 py-2.5 text-right tabular-nums">{t.totalKm != null ? num(t.totalKm) : "—"}</td>
+                  <td className="px-4 py-2.5 text-right tabular-nums">{num(t.initialKm)}</td>
+                  <td className="px-4 py-2.5 text-right tabular-nums">{t.finalKm != null ? num(t.finalKm) : "—"}</td>
                   <td className="px-4 py-2.5">
                     <StatusBadge tone={tripStatusTone[t.status]}>{tripStatusLabel[t.status]}</StatusBadge>
                   </td>

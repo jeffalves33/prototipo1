@@ -28,6 +28,11 @@ export const tripAvgConsumption = (t: Trip, tripRefuels: Refuel[]) => {
   return km / liters;
 };
 
+export const splitFixedRoute = (route: string) => {
+  const [origin = route, destination = route] = route.split(/\s*(?:->|→)\s*/);
+  return { origin, destination };
+};
+
 export const tripExpensesTotal = (tripExpenses: Expense[]) =>
   tripExpenses.reduce((s, e) => s + e.value, 0);
 

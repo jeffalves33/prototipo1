@@ -5,8 +5,8 @@ import { ActionDialog } from "@/components/admin/ActionDialog";
 import { FilterBar, TableShell } from "@/components/admin/AdminBlocks";
 import { StatCard } from "@/components/StatCard";
 import { StatusBadge } from "@/components/StatusBadge";
-import { trips, drivers, vehicles, expenses, refuels } from "@/lib/mock-data";
-import { brl, formatDateTime, num, sum } from "@/lib/calculations";
+import { trips, drivers, vehicles, expenses } from "@/lib/mock-data";
+import { brl, formatDateTime, num, splitFixedRoute, sum } from "@/lib/calculations";
 import { tripStatusLabel, tripStatusTone } from "@/lib/status-rules";
 import type { TripStatus } from "@/types/fleet";
 
@@ -59,8 +59,10 @@ function TripsPage() {
               { label: "Motorista", type: "select", options: drivers.map((driver) => ({ label: driver.name, value: driver.id })) },
               { label: "Veiculo / rota", type: "select", options: vehicles.map((vehicle) => ({ label: `${vehicle.plate} - ${vehicle.fixedRoute}`, value: vehicle.id })) },
               { label: "Rota", type: "summary", value: "Definida no cadastro do veiculo selecionado" },
-              { label: "Data de inicio", type: "date", value: "2026-05-29" },
+              { label: "Data inicial", type: "date", value: "2026-05-29" },
+              { label: "Data final", type: "date" },
               { label: "KM inicial", type: "number", placeholder: "412000" },
+              { label: "KM final", type: "number", placeholder: "413200" },
               { label: "Status", type: "select", options: Object.entries(tripStatusLabel).map(([value, label]) => ({ label, value })) },
               { label: "Veiculo temporario", type: "select", options: [{ label: "Nao", value: "nao" }, { label: "Sim", value: "sim" }] },
               { label: "Observacoes", type: "textarea", wide: true },
@@ -90,24 +92,26 @@ function TripsPage() {
             {vehicles.map((vehicle) => <option key={vehicle.id} value={vehicle.id}>{vehicle.plate} - {vehicle.model}</option>)}
           </select>
         </FilterBar>
-        <TableShell head={["Inicio", "Rota", "Motorista", "Veiculo", "KM", "Abast.", "Desp.", "Status", ""]}>
+        <TableShell head={["Data inicial", "Data final", "Origem", "Destino", "Motorista", "Veiculo", "KM inicial", "KM final", "Status", ""]}>
           {filtered.map((trip) => {
             const driver = drivers.find((item) => item.id === trip.driverId);
             const vehicle = vehicles.find((item) => item.id === trip.vehicleId);
-            const tripRefuels = refuels.filter((refuel) => refuel.tripId === trip.id);
-            const tripExpenses = expenses.filter((expense) => expense.tripId === trip.id);
+            const { origin, destination } = splitFixedRoute(
+              vehicle?.fixedRoute ?? `${trip.origin} -> ${trip.destination}`,
+            );
             return (
               <tr key={trip.id} className="hover:bg-muted/40">
                 <td className="px-4 py-3">{formatDateTime(trip.startedAt)}</td>
+                <td className="px-4 py-3">{formatDateTime(trip.finishedAt)}</td>
+                <td className="px-4 py-3 font-medium">{origin}</td>
                 <td className="px-4 py-3 font-medium">
-                  {vehicle?.fixedRoute ?? `${trip.origin} - ${trip.destination}`}
+                  {destination}
                   {trip.temporaryVehicleAssignment && <div className="text-xs text-info">Veiculo temporario autorizado pelo admin</div>}
                 </td>
                 <td className="px-4 py-3">{driver?.name ?? "-"}</td>
                 <td className="px-4 py-3">{vehicle?.plate ?? "-"}</td>
-                <td className="px-4 py-3 text-right">{trip.totalKm != null ? num(trip.totalKm) : "-"}</td>
-                <td className="px-4 py-3 text-right">{num(sum(tripRefuels.map((refuel) => refuel.liters)))} L</td>
-                <td className="px-4 py-3 text-right">{brl(sum(tripExpenses.map((expense) => expense.value)))}</td>
+                <td className="px-4 py-3 text-right">{num(trip.initialKm)}</td>
+                <td className="px-4 py-3 text-right">{trip.finalKm != null ? num(trip.finalKm) : "-"}</td>
                 <td className="px-4 py-3"><StatusBadge tone={tripStatusTone[trip.status]}>{tripStatusLabel[trip.status]}</StatusBadge></td>
                 <td className="px-4 py-3 text-right">
                   <a href={`/admin/viagens/${trip.id}`} className="font-medium text-primary hover:underline">Detalhes -&gt;</a>
